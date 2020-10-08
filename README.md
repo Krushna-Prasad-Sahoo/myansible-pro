@@ -1,6 +1,6 @@
 # TASK-01
 ## Write an Ansible PlayBook that does the following operations in the managed nodes:
-####🔅 Configure Docker
+####🔅 Configure Docker <br/>
 ####🔅 Start and enable Docker services
 ####🔅 Pull the httpd server image from the Docker Hub
 ####🔅 Run the httpd container and expose it to the public
