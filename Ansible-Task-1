@@ -1,0 +1,90 @@
+Task - 01:  Anisble -> Configure Docker -> setup httpd server & start
+===================================================================
+Steps :
+1.Ansible Host File 
+`````````````````````````````
+# vim /etc/ansible/ansible.cfg
+[defaults]
+inventory = /etc/myhosts.txt
+host_key_checking=false
+
+
+2.Ansible Configuration File
+```````````````````````````````````````
+# vim /etc/myhosts.txt
+[dockerhost]
+<ip>  ansible_ssh_user=root   ansible_ssh_pass=redhat
+
+
+3.Ping
+``````````
+# ansible dockerhost -m ping
+
+
+4.Main Yml File
+````````````````````````
+# vim dockerhost.yml
+- hosts: dockerhost
+  gather_facts: false
+  tasks:
+	- name: configure yum repository for docker
+	  yum_repository: 
+		name: dockerrepo
+		baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+		description: my docker repo
+		enabled: true
+		gpgcheck: no
+
+	- name: install docker tool
+	  command: "yum install docker-ce -y --nobest"
+
+	- name: install python36
+	  package:
+		name: python36
+		state: present
+
+	- name: install docker-py module
+	  pip:
+		name: docker-py
+
+	- name: create a directory
+	  file:
+		path: /root/Task1
+		state: directory
+
+	- name: copy contents
+	  copy:
+		src: "index.html"
+		dest: "/root/Task1"
+	  ignore_errors: yes
+
+	- name: start docker service
+	  service:
+		name: "docker"
+		state: started
+		enabled: yes
+
+	- name: image pull
+	  docker_image: 	
+		name: httpd
+		source: pull
+
+	- name: run the container
+	  docker_container: 
+		name: mywebserver
+		image: httpd
+		state: started
+		detach: true
+		interactive: true
+		ports:
+		  - "8181:80" 
+		volumes: 
+		  - /root/Task1/:/var/www/html/
+
+5.Run Playbook
+`````````````````````````
+# ansible-playbook docker.yml	
+
+6.Check From Browser
+````````````````````````````````	  
+<ip>:8181 
