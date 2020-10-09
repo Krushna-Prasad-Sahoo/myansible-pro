@@ -1,0 +1,48 @@
+- hosts: localhost
+  roles:
+- myos
+
+- hosts: ec2
+  roles:
+  - role: mywebserver
+
+
+
+# ansible-galaxy init myos
+# vim myos/tasks/main.yml
+# tasks file for myos
+- ec2:
+        key_name: mywebserver
+        instance_type: t2.micro
+        image: ami-052c08d70def0ac62
+        count: 1
+        instance_tags:
+          name: "WebServer"
+        vpc_subnet_id: "subnet-16c15918"
+        assign_public_ip: yes
+        region: us-east-1
+        state: present
+        group_id: "sg-09ca52d4174fb93c1"
+        aws_access_key: "ASIAR4EZ77JC3JWFHBP4"
+        aws_secret_key: "4qpkfoSzCQZ51UYH8qgtZrdFsKv0nCjAAhlQ6h9o"
+
+
+# anisible-galaxy init mywebserver
+# vim mywebserver/tasks/main.yml
+# tasks file for webserver
+- name: httpd install
+  package:
+          name: "httpd"
+          state: present
+
+- name: Copying content to the document root
+  copy:
+          content: "Hey Guys !! Welcome here"
+          dest: "/var/www/html/index.html"
+
+- name: Start the service
+  service:
+          name: "httpd"
+          state: started
+          enabled: yes
+
