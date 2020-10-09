@@ -1,0 +1,108 @@
+# ansible-vault create --vault-id aws@prompt secure.yml
+
+# vim awsplay.yml
+
+- hosts: localhost
+  vars_files: 
+    - secure.yml
+  tasks: 
+    - name: OS Provisioning for webserver
+      ec2:
+        key_name: "mywebserver"
+        instance_type: t2.micro
+        image: "ami-0ebc1ac48dfd14136"
+        count: 3
+        instance_tags:
+          Name: webservers
+        vpc_subnet_id: "subnet-16c15918"
+        assign_public_ip: yes
+        region: us-east-1
+        state: present
+        group_id: "sg-01ca62f41744fb3c1"
+        aws_access_key: "{{ access_key }}"
+        aws_secret_key: "{{ secret_key }}"
+      register: y
+
+    - name: OS Provisioning for Load Balancer
+      ec2:
+        key_name: "mywebserver"
+        instance_type: t2.micro
+        image: "ami-0ebc1ac48dfd14136"
+        count: 1
+        instance_tags:
+          Name: webservers
+        vpc_subnet_id: "subnet-16c15918"
+        assign_public_ip: yes
+        region: us-east-1
+        state: present
+        group_id: "sg-01ca62f41744fb3c1"
+        aws_access_key: "{{ access_key }}"
+        aws_secret_key: "{{ secret_key }}"
+      register: y
+
+
+# vim /webserver/tasks/main.yml
+
+# tasks file for webserver
+
+- name: httpd install
+  package: 
+    name: httpd
+    state: present
+  become: true
+
+- name: Set contents
+  copy: 
+    content: " Host Name : {{ ansible_hostname }}"
+    dest: /var/www/html/index.html
+  become: true
+
+- name: Start service
+  service:
+    name: httpd
+    state: started
+  become: true
+
+# vim /loadbalancer/tasks/main.yml
+# tasks file for loadbalancer
+
+- name: Install HAproxy
+  package:
+    name: "haproxy" 
+    state: present
+  become: true
+
+- name: configuration
+  template:
+    src: "/etc/haproxy/haproxy.cfg"
+    dest: "/etc/haproxy/haproxy.cfg"
+  notify: Restart
+  become: true
+
+- name: Start HAProxy service
+  service: 
+    name: "haproxy"
+    state: started
+  become: true
+
+# vim /loadbalancer/handlers/main.yml
+
+# handlers file for loadbalancer
+
+- name: Restart
+  service: 
+    name: "haproxy"
+    state: restarted
+  become: true
+
+# vim main_roles.yml
+
+- hosts: loadbalancer
+  roles:
+    - role: loadbalancer
+
+- hosts: webserver
+  roles: 
+    - role: webserver
+    
+# ansible-playbook --vault-id aws@prompt awsplay.yml    
