@@ -1,0 +1,31 @@
+Step-1 :
+- download & install AWS cli client software .
+- aws --version (for checking)
+
+Step-2:
+- aws configure 
+(enter the Access key, Secret Acess Key, Region and the Output Format (default is JSON format)) 
+
+Step-3:
+- aws ec2 create-key-pair --key-name keyforcli
+
+Step-4:
+- aws ec2 create-security-group --group-name awscli --description "awscli" --vpc-id vpc-2ac01498
+
+Step-5:
+- aws ec2 authorize-security-group-ingress -- group-id sg-11826ba4c5914fdeb --group-name awscli --protocol tcp --port 22 --cidr 0.0.0.0/0
+
+Step-6:
+- aws ec2 run-instances --image-id ami-052c08d70def0ac62 --instance-type t2.micro --count=1 --subnet-id subnet-1be19d30 --security-group-ids sg-11826ba4c5914fdeb --key-name keyforcli
+
+Step-7:
+- aws ec2 create-volume --availability-zone us-east-1b --size 1
+
+Step-8:
+- aws ec2 attach-volume --volume-id vol-09866940fb6a5eb52 --instance-id i-07c80aac43edf812f --device=/dev/sdf
+
+Step-9:
+- Next you can login into it via ssh protocol
+
+Step-10:
+- Then create partition -> format it -> mount it -> Use .
