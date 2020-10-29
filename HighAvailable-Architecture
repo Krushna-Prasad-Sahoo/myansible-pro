@@ -1,0 +1,26 @@
+Step - 01 : Launch EC2 instance
+# aws ec2 run-instances  --image-id  ami-0e306788ff2473ccb  --instance-type  t2.micro --subnet-id subnet-1ce09f50  --security-group-ids sg-02915ad4c4814ecda  --key-name  myclikey --count 1
+
+Step - 02 : Create ebs volume
+# aws ec2 create-volume --availability-zone ap-south-1b --size 1 
+
+Step - 03 : Attach ebs volume
+# aws ec2 attach-volume --volume-id vol-09866940fb6a5eb52 --instance-id i-07c80aac43edf812f --device=/dev/sdf
+
+Step - 04: Install Apache Web Server 
+# ssh <ip> -i myclikey.pem -l ec2-user sudo yum install httpd -y
+
+Step - 05: Create partition, format & mount.
+# ssh <ip> -i myclikey.pem -l ec2-user sudo fdisk  /dev/xvdf
+# ssh <ip> -i myclikey.pem -l ec2-user sudo mkfs.ext4 /dev/xvdf1
+# ssh <ip> -i myclikey.pem -l ec2-user sudo mount  /dev/xvdf1   /var/www/html 
+
+Step - 06 : Create a S3 bucket.
+# aws s3api  create-bucket  --bucket kptsk-5  --region ap-south-1   
+
+Step - 07 : Create CloudFront Distribution
+# aws cloudfront create-distribution  --origin-domain-name  myaws_task_five.s3.amazonaws.com 
+
+Step-08 : Get url & use it.
+-> We can see the unique URL can be accessed with high speed and low latency .
+Now we can use this URL in our HTML code as the source for image file instead of S3 URL .
