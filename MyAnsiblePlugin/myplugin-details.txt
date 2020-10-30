@@ -1,198 +1,27 @@
+Step - 01 :
+ - Create a Playbook
 # vi myplugin.yml
-
-- hosts: localhost
-  vars_prompt:
-   - name: pass
-     prompt: "Please enter the password "
-     private: yes
-
-   - name: url
-     prompt: "Please enter the url of News Article You want to read "
-     private: no
-
-   - name: job
-     prompt: "Please enter the job role you are interested in "
-     private: no
-
-   - name: location
-     prompt: "Plz provide the location u want to search for the job role "
-     private: no
-  tasks:
-     - debug:
-        msg: "{{ pass | KPS_filter }}"
-     - debug:
-        msg: "{{ job | job_filter }}"
-     - debug:
-        msg: "{{url | news_filter}}"
-
 ------------------------------------------------------------------------------
-
+Step - 02 : 
+ - Create a directory named as filter_plugins
+# mkdir filter_plugins/
+------------------------------------------------------------------------------
+Step - 03 :
+ - Enter into the directory and create the scripting file myfilter.py there . 
 # cd filter_plugins/
 # vi myfilter.py
-
-import os
-import time
-import datetime as dt
-d = dt.date.today()
-aaj = 'To{1} is {0:%d}, the {2} is {0:%B} and {3} is {0:%Y}.'.format(d, "day", "month", "year")
-class FilterModule(object):
-    def filters(self):
-        return {
-            'KPS_filter':self.KPS_filter,
-        }
-    def KPS_filter(self, kps_variable):
-        if kps_variable == 'kps':
-           os.system("clear")
-           print("\n")
-           os.system("tput setaf 6")
-           print("          ***************--------- Welcome KP ----------***************")
-           time.sleep(2)
-           print("\n")
-           os.system("tput setaf 5")
-           print(aaj)
-           os.system("tput setaf 3")
-           print("\nSee your system process tree : ")
-           print("\n")
-           os.system("tput setaf 7")
-           time.sleep(3)
-           os.system("pstree")
-           time.sleep(6)
-           os.system("clear")
-           os.system("tput setaf 6")
-           print("\n          ***************--------- Welcome KP ----------***************")
-           time.sleep(1)
-           os.system("tput setaf 3")
-           print("See the detailed process status :\n")
-           os.system("tput setaf 7")
-           os.system("ps  -au")
-           time.sleep(3)
-           print("\n")
-           time.sleep(2)
-           os.system("tput setaf 3")
-           print("See the status")
-           print("\n")
-           time.sleep(2)
-           os.system("tput setaf 7")
-           os.system("sestatus")
-           time.sleep(6)
-           print("\n")
-           os.system("clear")
-           print("\n")
-           time.sleep(1)
-           os.system("clear")
-           print("\n")
-           os.system("tput setaf 3")
-           print("\n          ***************--------- Thank You KP :) ----------***************")
-           print("\n\t\t Now you see the Job Search Results & News Article  ..")
-           time.sleep(2)
-           os.system("tput setaf 7")
-
-        else:
-          os.system("clear")
-          print()
-          os.system("tput setaf 3")
-          print("\n\tAuthorization Failed ..")
-          time.sleep(3)
-          print("\tSorry !! You are not KP, try Again :(")
-          os.system("tput setaf 7")
-          print()
-          quit()
------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+Step - 04 :
+ - Create another scripting file job.py in same directory .
 # vi job.py
-
-#!/usr/bin/python3
-import os
-import requests
-import bs4
-from bs4 import BeautifulSoup
-import time
-class FilterModule(object):
-  def filters(self):
-     return {
-       "job_filter": self.job_filter,
-     }
-  def job_filter(self, role):
-    role = role.replace(" ", "+")
-    URL =  "https://www.indeed.com/jobs?q={0}+%2420%2C000&l=Los+Angeles&start=10".format(role)
-    #URL =  "https://www.indeed.com/jobs?q=devops+engineer+%2420%2C000&l=Los+Angeles&start=10"
-    page = requests.get(URL)
-    soup = BeautifulSoup(page.text, "html.parser")
-    #print(soup.prettify())
-
-    def extract_job_title_from_result(soup):
-     jobs = []
-     for div in soup.find_all(name="div", attrs={"class":"row"}):
-        for a in div.find_all(name="a", attrs={"data-tn-element":"jobTitle"}):
-            jobs.append(a["title"])
-     return(jobs)
-    os.system("clear")
-    time.sleep(1)
-    os.system("tput setaf 5")
-    print("The job titles are as follows : ")
-    print("\n")
-    os.system("tput setaf 2")
-    time.sleep(2)
-    extract_job_title_from_result(soup)
-    print("\n")
-    time.sleep(5)
-
-    def extract_summary_from_result(soup):
-     summaries = []
-     spans = soup.findAll('div', attrs={'class': 'summary'})
-     for span in spans:
-        summaries.append(span.text.strip())
-     return(summaries)
-    os.system("tput setaf 5")
-    print("Respective Job Descriptions : ")
-    print("\n")
-    time.sleep(2)
-    os.system("tput setaf 2")
-    extract_summary_from_result(soup)
-    print("\n")
---------------------------------------------------------------------------------------------------
-
+-----------------------------------------------------------------------------------------------
+Step - 05 :
+ - Create another scripting file news.py in the same directory .
 # vi news.py
-
-#!/usr/bin/python3
-from newspaper import Article
-import nltk
-nltk.download('punkt')
-import os
-import time
-class FilterModule(object):
-  def filters(self):
-     return {
-       "news_filter": self.news_filter,
-     }
-  def news_filter(self, url):
-    article = Article(url, language="en") # en for English
-    article.download()
-    article.parse()
-    article.nlp()
-
-    os.system("clear")
-    os.system("tput setaf 3")
-    print("-------------------- Article Title --------------------")
-    time.sleep(2)
-    os.system("tput setaf 6")
-    print(article.title) #prints the title of the article
-    print("\n")
-    time.sleep(1)
-    os.system("tput setaf 3")
-    print("-------------------- Article Text--------------------")
-    time.sleep(2)
-    os.system("tput setaf 6")
-    print(article.text) #prints the entire text of the article
-    print("\n")
-    time.sleep(1)
-    os.system("tput setaf 3")
-    print("-------------------- Article Summary --------------------")
-    os.system("tput setaf 6")
-    time.sleep(2)
-    print(article.summary) #prints the summary of the article
-    os.system("tput setaf 7")
-    print("\n")
--------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
+Step - 06 :
+ - Go back and run the Ansible playbook. 
 # cd
 # ansible-playbook  myplugin.yml
+-------------------------------------------------------------------------------------------------
 
