@@ -1,0 +1,68 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+          - name: creating yum repository for docker
+            yum_repository:
+                    name: "docker"
+                    description: "docker repo"
+                    baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"                                                                                                             stable/"
+                    gpgcheck: no
+
+          - name: download docker-ce
+            command: "yum install docker-ce  -y  --nobest"
+
+          - name: start docker service
+            service:
+                name: "docker"
+                state: started
+                enabled: yes
+
+          - name: install python36
+            package:
+                    name: "python36"
+                    state: present
+
+          - name: install docker python library
+            pip:
+                    name: docker-py
+
+          - name: httpd image pulling
+            docker_image:
+                    name: "httpd"
+                    source: pull
+
+          - name: creating a directory
+            file:
+                    path: "/myfolder"
+                    state: directory
+
+          - name: creating a file
+            file:
+                    path: "/myfolder/index.html"
+                    state: file
+
+          - name: add contents into the previous file created
+            copy:
+                    dest: "/myfolder/index.html"
+                    content: "<br/><marquee><h1>This is my new WebPage</h1></mar                                                                                                             quee><br/>"
+
+          - name: start the container
+            docker_container:
+                    name: "myweb"
+                    image: "httpd"
+                    volumes:
+                        - "/myfolder:/usr/local/apache2/htdocs/"
+                    ports:
+                            - "8081:80"
+                    expose:
+                            - "8081"
+                    state: started
+
+          - name: stop firewall
+            service:
+                    name: "firewalld"
+                    state: stopped
+
+
+# cd /myfolder/
+# touch  index.html
