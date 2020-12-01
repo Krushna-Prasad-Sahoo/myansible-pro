@@ -1,0 +1,98 @@
+- hosts: all
+
+  tasks:
+
+  - name: "Copy JDK"
+    copy: 
+      dest: "/root"
+      src: "/root/jdk-8u171-linux-x64.rpm"
+
+  - name: "Copy Hadoop Package"
+    copy:
+      dest: "/root"
+      src: "/root/hadoop-1.2.1-1.x86_64.rpm"
+
+  - name: "Install JDK"
+    command: "rpm -i jdk-8u171-linux-x64.rpm"
+
+  - name: "Install Hadoop"
+    command: "rpm -i hadoop-1.2.1-1.x86_64.rpm --force"
+     
+# Name Node 
+
+- hosts: 192.168.0.103
+
+  vars_prompt:
+     - name: "hadoop-nn"
+       private: no
+       prompt: "Enter the name of NameNode Directory "
+
+  tasks:
+
+  - name: "hdfs-site in NameNode"
+    template:
+      dest: "/etc/hadoop/hdfs-site.xml"
+      src: "/root/ansible-ws/hadoop/hadoop-nn.xml"
+
+  - name: "core-site in NameNode"
+    template:
+      dest: "/etc/hadoop/core-site.xml"
+      src: "/root/ansible-ws/hadoop/cs.xml"
+
+  - name: "Formatting the Directory"
+      command: "hadoop namenode -format"
+
+  - name: "Start Name NOde Service"
+    command: "hadoop-daemon.sh start namenode"
+
+
+# Data Node
+     
+- hosts: 192.168.0.102
+
+  vars_prompt:
+     - name: "hadoop-dn"
+       private: no
+       prompt: "Enter the name of DataNode Directory "
+ 
+  tasks:
+          
+  - name: "hdfs-site in Data Node"
+    template:
+      dest: "/etc/hadoop/hdfs-site.xml"
+      src: "/root/ansible-ws/hadoop/hadoop-dn.xml"
+
+  - name: "core-site in Data Node"
+    template:
+      dest: "/etc/hadoop/core-site.xml"
+      src: "/root/ansible-ws/hadoop/cs.xml"
+
+  - name: "Start Data Node Service"
+    command: "hadoop-daemon.sh start datanode"
+
+  - name: Check Report
+      command: "hadoop dfsadmin -report"
+
+# ===============================================================
+# ===============================================================
+
+hadoop-nn.xml
+`````````````
+<configuration>
+<property>
+<name>dfs.name.dir</name>
+<value>{{ hadoop-nn }}</value>
+</property>
+</configuration>
+
+# ===============================================================
+# ===============================================================
+
+hadoop-dn.xml
+`````````````
+<configuration>
+<property>
+<name>dfs.data.dir</name>
+<value>{{ hadoop-dn }}</value>
+</property>
+</configuration>
