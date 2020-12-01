@@ -44,7 +44,7 @@
           - name: add contents into the previous file created
             copy:
                     dest: "/myfolder/index.html"
-                    content: "<br/><marquee><h1>This is my new WebPage</h1></mar                                                                                                             quee><br/>"
+                    content: "<br/><marquee><h1>This is my new WebPage</h1></marquee>                                                                                                             quee><br/>"
 
           - name: start the container
             docker_container:
