@@ -1,0 +1,78 @@
+# cat /etc/ansible/ansible.cfg
+[defaults]
+inventory=/root/ip.txt
+gpgcheck=0
+
+[privilege_escalation]
+become=true
+become_method=sudo
+become_user=root
+become_ask_pass=false
+
+==============================================================
+
+# cat /root/ip.txt
+[mylb]
+3.95.178.175  ansible_ssh_user=root  ansible_ssh_private_key_file=/etc/mykey.pem 
+[myweb]
+36.183.27.111  ansible_ssh_user=root  ansible_ssh_private_key_file=/etc/mykey.pem
+54.72.151.117  ansible_ssh_user=root  ansible_ssh_private_key_file=/etc/mykey.pem
+54.89.43.45  ansible_ssh_user=root  ansible_ssh_private_key_file=/etc/mykey.pem
+
+==============================================================
+
+-> Some changes in local "haproxy.cfg" file.
+
+# -----------------------------------
+# round robin balancing ...
+# -----------------------------------
+backend app
+	balance  roundrobin
+{% for i in groups['myweb'] %}
+   server  app{{  loop.index  }}   {{ i }}:80  check
+{{%  endfor  %}}
+
+==============================================================
+# cat mylb.yml
+
+- hosts: myweb
+  tasks:
+	- name: "installing httpd"
+	  package:
+		name: "httpd"
+		state: present
+
+	- name: "installing php"
+	  package:
+		name: "php"
+		state: present
+
+	- name: "copy content"
+	  copy:
+		src: "/index.php"
+		dest: "/var/www/html"
+
+	- name: "starting service"
+	  service:
+		name: "httpd"
+		state: started
+- hosts: mylb
+  tasks:
+	- name: "installing haproxy"
+	  package:
+		name: "haproxy"
+		state: present
+
+	- name: "sending haproxy config file"
+	  template:
+		src: "haproxy.cfg.j2"
+		dest: "/etc/haproxy/haproxy.cfg"
+
+	- name: "start service"
+	  service:
+		name: "haproxy"
+		state: restarted
+
+# ansible-playbook mylb.yml
+
+
