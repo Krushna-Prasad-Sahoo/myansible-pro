@@ -1,0 +1,66 @@
+# cat /root/ip.txt
+[mylb]
+192.168.0.120  ansible_ssh_user=root  ansible_ssh_pass=redhat 
+[myweb]
+192.168.0.122  ansible_ssh_user=root  ansible_ssh_pass=redhat
+192.168.0.123  ansible_ssh_user=root  ansible_ssh_pass=redhat
+192.168.0.124  ansible_ssh_user=root  ansible_ssh_pass=redhat
+
+=========================================================================
+
+-> Some changes in local "haproxy.cfg" file.
+
+# -----------------------------------
+# round robin balancing ...
+# -----------------------------------
+backend app
+	balance  roundrobin
+{% for i in groups['myweb'] %}
+   server  app{{  loop.index  }}   {{ i }}:80  check
+{{%  endfor  %}}
+
+=============================================================================
+
+# cat mylb.yml
+
+- hosts: myweb
+  tasks:
+	- name: "installing httpd"
+	  package:
+		name: "httpd"
+		state: present
+
+	- name: "installing php"
+	  package:
+		name: "php"
+		state: present
+
+	- name: "copy content"
+	  copy:
+		src: "/index.php"
+		dest: "/var/www/html"
+
+	- name: "starting service"
+	  service:
+		name: "httpd"
+		state: started
+- hosts: mylb
+  tasks:
+	- name: "installing haproxy"
+	  package:
+		name: "haproxy"
+		state: present
+
+	- name: "sending haproxy config file"
+	  template:
+		src: "haproxy.cfg.j2"
+		dest: "/etc/haproxy/haproxy.cfg"
+
+	- name: "start service"
+	  service:
+		name: "haproxy"
+		state: restarted
+
+# ansible-playbook mylb.yml
+
+
