@@ -1,0 +1,9 @@
+Question
+`````````
+14.1 Create a  network Topology Setup in such a way  so that System A can  ping to two Systems i.e. 
+System B and System C but both these systems should not be pinging each other implement this setup without 
+using any security rule or firewall. Recommended to use networking tricks i.e. by manipulating IP & Netmask.
+
+Answer
+``````
+https://www.linkedin.com/posts/krushna-prasad_lets-play-with-routing-table-activity-6744840774355034112-vs3a

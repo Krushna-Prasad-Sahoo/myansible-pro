@@ -1,0 +1,48 @@
+- hosts: webserver
+  tasks:
+    - name: yum docker repository
+      yum_repository:
+        name: docker
+        description: yum repo for docker
+        baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+        gpgcheck: no
+
+    - name: installing docker
+      package:
+        name: "docker-ce-3:18.09.1-3.e17"
+        state: present
+
+    - name: starting services
+      service:
+        name: "docker"
+        state: started
+        enabled: yes
+
+    - name: installing docker by pip
+      command: pip3 install docker-py
+
+    - name: pull image
+      docker_image:
+         name: "httpd"
+         source: pull
+
+    - name: creating directory 
+      file:
+        path: /myweb
+        state: directory
+
+    - name: copying files
+      copy:
+        src:  "myweb/myweb.html"
+        dest: "/myweb/"
+
+    - name: Creating a httpd container
+      docker_container:
+        name:  WebOS
+        image: "httpd"
+        volumes:
+        - /myweb:/usr/local/apache2/htdocs/
+        exposed_ports:
+        - "81"
+        ports:
+        - "8888:80"

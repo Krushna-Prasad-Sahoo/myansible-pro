@@ -1,0 +1,21 @@
+- hosts: localhost
+  tasks:
+  - name: Stopping SElinux 
+    ansible.posix.selinux:
+      policy: targeted
+      state:  permissive
+  
+  - name: Retrieving Container IP
+    community.general.docker_container_info:
+      name:  "WebOS"
+    register: ip
+
+  - debug:
+      var: ip.container.NetworkSettings.IPAddress
+
+  - name: Updating inventory file with Container IP
+    blockinfile:
+            dest:  "/root/ip.txt"
+            block:  |
+                     [docker]
+                     {{ ip['container']['NetworkSettings']['IPAddress'] }} ansible_user=root ansible_ssh_pass=redhat ansible_connection=ssh
