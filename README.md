@@ -1,4 +1,4 @@
-# TASK-01
+# Project-01
 ## Write an Ansible PlayBook that does the following operations in the managed nodes:
 🔅 Configure Docker <br/>
 🔅 Start and enable Docker services <br/>
@@ -8,7 +8,7 @@
 
 -----------------------------------------------------------------------------------------------------------
 
-# Task 2
+# Project-02
 ## Deploy Web Server on AWS through ANSIBLE!
 🔅Provision EC2 instance through ansible. <br/>
 🔅Retrieve the IP Address of instance using dynamic inventory concept. <br/>
@@ -17,7 +17,7 @@
 
 ------------------------------------------------------------------------------------------------------------
 
-# Task 2
+# Project-03
 ## Deploy a Load Balancer and multiple Web Servers on AWS instances through ANSIBLE!
 🔅Provision EC2 instances through ansible. <br/>
 🔅 Retrieve the IP Address of instances using the dynamic inventory concept. <br/>
@@ -27,7 +27,7 @@
 
 -----------------------------------------------------------------------------------------------------------
 
-# AWS Task 
+# AWS Project
 ## Attach an EBS volume to newly created EC2 instance using CLI .
 🔅Create a key pair.<br/>
 🔅Create a security group.<br/>
